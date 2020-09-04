@@ -1,0 +1,24 @@
+# The daemon arguments are used to configure daemon.conf
+# these are values I found worked well in my setup.
+# I only set values I needed to change from default
+daemon_fragments: 8
+daemon_fragment_size_msec: 10
+daemon_deferred_volume_safety_margin_usec: 8000
+
+# This is the name needed for /boot/config.txt
+soundcard_name: hifiberry-dacplus
+
+# If you are using ufw it will open all ports to the
+# allow_hosts list
+use_ufw: false
+# If you wish to set an acl for pulse tcp connections
+# this will put your allow_hosts in the list
+use_pulseacl: false
+# allow_hosts must contain at least one value if either
+# use_ufw or use_pulseacl is true
+allow_hosts: []
+
+# switch off blue tooth if not needed
+allow_bluetooth: false
+# switch off wifi if using ethernet
+allow_wifi: false

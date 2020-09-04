@@ -1,0 +1,123 @@
+# Preps the device for pulsecast
+# not worth the effort to automate all steps
+# also hosts must have the pi variable set in inventory
+# otherwise the firewall be misconfigured and a
+# lot of extra stuff will be installed which will make update
+# run slower in the future (but otherwise shouldn't matter).
+
+# Rather than get into the configuration of ports for RTP
+# streaming sources are allowed to connect to any port.
+# The device is used only for audio streaming and the
+# network is private and trusted.
+# If you are not using ufw just comment out the step.
+
+- name: hosts allowed to connect
+  ufw:
+    rule: allow
+    src: '{{ item }}'
+  with_items: "{{ allow_hosts }}"
+  when: use_ufw
+
+- name: install pulsecast packages
+  package:
+    name: "{{ packages }}"
+    state: present
+    update_cache: true
+  vars:
+    packages:
+      - pulseaudio
+      - pulseaudio-utils
+      - screen
+
+- name: Make it impossible for systemd to start pulseaudio.socket
+  ignore_errors: true
+  systemd:
+    name: pulseaudio.socket
+    scope: global
+    masked: yes
+    state: stopped
+
+- name: Make it impossible for systemd to start pulseaudio.service
+  ignore_errors: true
+  systemd:
+    name: pulseaudio.service
+    scope: global
+    masked: yes
+    state: stopped
+
+- name: startpulse script
+  copy:
+    src: startpulse.sh
+    dest: /usr/local/sbin/startpulse.sh
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: reloadpulse script
+  copy:
+    src: reloadpulse.sh
+    dest: /usr/local/sbin/reloadpulse.sh
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+
+- name: daemon.conf
+  template:
+    src: daemon.conf.j2
+    dest: /etc/pulse/daemon.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+- name: default.pa
+  template:
+    src: default.pa.j2
+    dest: /etc/pulse/default.pa
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+- name: 'configure the pi to use the hifiberry soundcard'
+  lineinfile:
+    path: /boot/config.txt
+    line: "dtoverlay={{ soundcard_name }}"
+
+- name: 'disable built in sound card'
+  replace:
+    path: /boot/config.txt
+    regexp: '^dtparam=audio=on'
+    replace: '# dtparam=audio=on disabled for hifiberry'
+
+- name: 'disable bluetooth'
+  lineinfile:
+    state: present
+    path: /boot/config.txt
+    line: 'dtoverlay=pi3-disable-bt'
+  when: not allow_bluetooth
+
+- name: 'enable bluetooth'
+  lineinfile:
+    state: absent
+    path: /boot/config.txt
+    line: 'dtoverlay=pi3-disable-bt'
+  when: allow_bluetooth
+
+- name: 'disable wifi'
+  lineinfile:
+    path: /boot/config.txt
+    line: 'dtoverlay=pi3-disable-wifi'
+  when: not allow_wifi
+
+- name: add startpulse to rc.local
+  lineinfile:
+    path: /etc/rc.local
+    insertbefore: 'exit 0'
+    line: 'sudo -u pi screen -d -m bash -c "/usr/local/sbin/startpulse.sh"'
+
+- name: restart pulse at 6:30 am every day
+  cron:
+    name: "restart pulse"
+    minute: "30"
+    hour: "6"
+    user: pi
+    job: "/usr/bin/pkill pulseaudio"

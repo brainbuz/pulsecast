@@ -1,0 +1,27 @@
+
+.ifexists module-udev-detect.so
+load-module module-udev-detect
+.else
+load-module module-detect
+.endif
+
+# native protocol-unix is enabled in case some future service
+# such as mpd needs it, with security open to local connections.
+load-module module-native-protocol-unix auth-anonymous
+# native protocol-tcp may be left open or given an ip acl list.
+{% if use_pulseacl %}
+{% set acl_list = [ '127.0.0.1' ] %}
+{% for item in allow_hosts %} {{  acl_list.append( item ) }} {% endfor %}
+load-module module-native-protocol-tcp auth-ip-acl={{ acl_list|join(';') }}
+{% else %}
+load-module module-native-protocol-tcp
+{% endif %}
+load-module module-rtp-recv
+
+load-module module-always-sink
+load-module module-intended-roles
+load-module module-suspend-on-idle
+
+#load-module module-position-event-sounds
+#load-module module-filter-heuristics
+#load-module module-filter-apply
