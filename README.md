@@ -19,8 +19,9 @@ The daemon values are those that I've needed to set. These values will be set in
     daemon_fragment_size_msec
     daemon_deferred_volume_safety_margin_usec
 
-You will need to know the soundcard name for /boot/config.txt
-    soundcard_name
+You will need to know the soundcard name for /boot/config.txt, default is for hifiberry.
+
+    soundcard_name: my_hifi_soundcard
 
 If you are using ufw it will open all ports to the allow_hosts list.
 
@@ -47,18 +48,18 @@ Dependencies
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: raspbian
+    - hosts: pi
+      vars:
+        soundcard_name: my_hifi_soundcard
+        use_ufw: true
+        use_pulseacl: false
+        allow_hosts: [ '192.168.1.11', '192.168.11.1' ]
+        allow_bluetooth: false
+        allow_wifi: false
       roles:
-         - brainbuz.pulsecast
+        - brainbuz.pulsecast
 
 License
 -------
 
 GPL3
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
