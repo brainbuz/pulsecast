@@ -22,3 +22,7 @@ allow_hosts: []
 allow_bluetooth: false
 # switch off wifi if using ethernet
 allow_wifi: false
+
+dailypulserestart: true
+dailypulserestart_hour: '6'
+dailypulserestart_minute: '30'

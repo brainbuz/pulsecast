@@ -1,7 +1,7 @@
 galaxy_info:
   author: John Karr
   description: Use a SBC running Raspbian as a PulseAudio player
-  version: 1.0.2
+  version: 1.0.3
   license: license GPL-3.0-or-later
 
   min_ansible_version: 2.9

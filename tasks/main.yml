@@ -114,10 +114,11 @@
     insertbefore: 'exit 0'
     line: 'sudo -u pi screen -d -m bash -c "/usr/local/sbin/startpulse.sh"'
 
-- name: restart pulse at 6:30 am every day
+- name: restart pulse every day
   cron:
     name: "restart pulse"
-    minute: "30"
-    hour: "6"
+    minute: "{{ dailypulserestart_minute }}"
+    hour: "{{ dailypulserestart_hour }}"
     user: pi
     job: "/usr/bin/pkill pulseaudio"
+  when: dailypulserestart

@@ -42,6 +42,14 @@ Options to disable wife and bluetooth if they're not in use.
     allow_bluetooth: boolean
     allow_wifi: boolean
 
+Crontab to restart pulseaudio every day.
+
+Shown are the default values to restart the pulse daemon every day at 6:30 AM. Check your timezone with `ls -l /etc/localtime`, Raspberry Pi defaults to UK for timezone. The audio from your devices may pick up lag and drift between devices over time, the daily restart fixes this problem.
+
+    dailypulserestart: true
+    dailypulserestart_hour: '6'
+    dailypulserestart_minute: '30'
+
 Dependencies
 ------------
 
